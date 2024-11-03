@@ -1,31 +1,22 @@
-import { prisma } from "./utils/db";
-import express, { Request, Response } from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-
+import dotenv from 'dotenv';
 dotenv.config();
 
-const app = express();
-
-app.use(cors());
-
-app.use(express.json());
+import app from './app';
+import { prismaClientSingleton } from './utils/clients';
 
 // Initialize database connection
-prisma
+prismaClientSingleton
   .$connect()
   .then(() => {
-    console.log("Successfully connected to database");
+    console.log('Successfully connected to database');
+
+    // Start the server after the database connection is established
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   })
   .catch((error) => {
-    console.error("Failed to connect to database:", error);
+    console.error('Failed to connect to database:', error);
     process.exit(1);
   });
-
-app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: "Not found" });
-});
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
