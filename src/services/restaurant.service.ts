@@ -1,31 +1,25 @@
 import { YelpClient } from "../thirdParty/yelp/client";
 import { YelpSearchResponse } from "../thirdParty/yelp/types";
-import { DatabaseError, ValidationError, YelpApiError } from "../errors/custom-errors";
+import {
+  DatabaseError,
+  ValidationError,
+  YelpApiError,
+} from "../errors/custom-errors";
 import { YelpBusiness } from "../thirdParty/yelp/types";
-import { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
+import {
+  SearchRestaurantsParams,
+  ApiResponse,
+} from "../interfaces/gloabal-types";
 import { PrismaClient } from "@prisma/client";
 import { ValidatorService } from "./validator.service";
-
-interface RestaurantFormatForDatabase {
-  store_name: string;
-  external_store_id: string;
-  country: string;
-  country_code: string;
-  city: string;
-  date: Date; // date of data entry
-  restaurant_opened_at: Date; // time restaurant opened at
-  menu_available: boolean; // if the menu is available
-  restaurant_online: boolean; // if the restaurant is online
-  restaurant_offline: boolean; // if the restaurant is offline
-}
+import { RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
+import { prismaClientSingleton, yelpClientSingleton } from "../utils/clients";
 
 export class RestaurantService {
   constructor(
-    private readonly yelpClient: YelpClient,
-    private readonly prisma: PrismaClient,
+    private readonly yelpClient: YelpClient = yelpClientSingleton,
+    private readonly prisma: PrismaClient = prismaClientSingleton,
   ) {}
-
-  // map the restaurants to the database schema
 
   private parseOpeningHours(restaurant: YelpBusiness): Date {
     const now = new Date();
@@ -35,7 +29,6 @@ export class RestaurantService {
         // Split time into hours and minutes
         const hour = parseInt(openingTime.slice(0, 2)); // e.g. "12" -> 12
         const minute = parseInt(openingTime.slice(2, 4)); // e.g. "00" -> 0
-
         // Set the time
         now.setHours(hour, minute, 0, 0);
 
@@ -115,7 +108,7 @@ export class RestaurantService {
     }
   }
 
-  async syncRestaurantsWithDatabase(
+  async fetchDataFromDatabase(
     searchParams: SearchRestaurantsParams,
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
     try {
@@ -124,9 +117,8 @@ export class RestaurantService {
         await this.mapRestaurantsToDatabaseSchema(searchParams);
 
       // 2. Save to database
-      const savedRestaurants = await this.saveRestaurantsToDatabase(
-        mappedRestaurants,
-      );
+      const savedRestaurants =
+        await this.saveRestaurantsToDatabase(mappedRestaurants);
 
       // 3. Return confirmation and Success
       return {
@@ -145,7 +137,9 @@ export class RestaurantService {
         throw error;
       }
       console.error(`[Unknown Error] ${error.message}`, error);
-      throw new Error(`Failed to sync restaurants and return restaurants: ${error.message}`);
+      throw new Error(
+        `Failed to sync restaurants and return restaurants: ${error.message}`,
+      );
     }
   }
 }

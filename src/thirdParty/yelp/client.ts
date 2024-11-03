@@ -3,7 +3,7 @@ import { YelpApiError } from "../../errors/custom-errors";
 import { SearchRestaurantsParams } from "../../interfaces/gloabal-types";
 
 export class YelpClient {
-  constructor(private readonly apiKey: string) {
+  constructor(private readonly apiKey: string = process.env.YELP_API_KEY!) {
     if (!apiKey) {
       throw new Error("Yelp API key is required");
     }

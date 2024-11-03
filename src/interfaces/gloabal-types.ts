@@ -12,3 +12,16 @@ export interface ApiResponse<T> {
   message: string;
   count?: number;
 }
+
+export interface RestaurantFormatForDatabase {
+  store_name: string;
+  external_store_id: string;
+  country: string;
+  country_code: string;
+  city: string;
+  date: Date; // date of data entry
+  restaurant_opened_at: Date; // time restaurant opened at
+  menu_available: boolean; // if the menu is available
+  restaurant_online: boolean; // if the restaurant is online
+  restaurant_offline: boolean; // if the restaurant is offline
+}

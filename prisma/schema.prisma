@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model RestaurantData {
+  id                  Int      @id @default(autoincrement())
+  store_name          String
+  external_store_id   String   @unique // Yelp ID
+  country             String
+  country_code        String
+  city                String
+  date                DateTime @default(now())
+  restaurant_opened_at DateTime
+  menu_available      Boolean
+  restaurant_online   Boolean
+  restaurant_offline  Boolean
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@index([country_code])
+  @@index([city])
+  @@index([date])
+  @@map("restaurant_data") // Uses snake_case for PostgreSQL table name
+}
+
+
