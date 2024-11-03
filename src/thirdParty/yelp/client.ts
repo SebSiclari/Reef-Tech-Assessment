@@ -1,13 +1,6 @@
 import { YelpSearchResponse } from "./types";
 import { YelpApiError } from "../../errors/custom-errors";
-
-interface SearchRestaurantsParams {
-	location: string;
-	term?: string;
-	categories?: string;
-	open_now?: boolean;
-	limit?: number;
-}
+import { SearchRestaurantsParams } from "../../interfaces/gloabal-types";
 
 export class YelpClient {
 	constructor(private readonly apiKey: string) {
@@ -29,9 +22,9 @@ export class YelpClient {
 		return queryParams.toString();
 	}
 
-	async searchRestaurants(
+	async getRestaurantsFromYelpAPI(
 		filterParams: SearchRestaurantsParams,
-	): Promise<YelpSearchResponse[]> {
+	): Promise<YelpSearchResponse> {
 		try {
 			const queryParams = this.formatFilterParams(filterParams);
 
@@ -44,7 +37,7 @@ export class YelpClient {
 				},
 			);
 			const data = await response.json();
-			return data.businesses;
+			return data;
 		} catch (error: any) {
 			console.error("Error searching for restaurants:", error);
 			throw new YelpApiError("Error searching for restaurants", error.status);
