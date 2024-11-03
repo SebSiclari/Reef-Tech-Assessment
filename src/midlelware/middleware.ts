@@ -2,12 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { SearchRestaurantsParams } from "../interfaces/gloabal-types";
 import { ValidationError } from "../errors/custom-errors";
 
-export const errorHandler = (
-  err: unknown,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
 
   if (err instanceof ValidationError) {
@@ -18,8 +13,7 @@ export const errorHandler = (
 };
 
 export const validateSearchParams = (req: Request, next: NextFunction) => {
-  const { location, term, categories, open_now, limit } =
-    req.query as unknown as SearchRestaurantsParams;
+  const { location, term, categories, open_now, limit } = req.query as unknown as SearchRestaurantsParams;
   if (!location) {
     throw new ValidationError("Location is required");
   }

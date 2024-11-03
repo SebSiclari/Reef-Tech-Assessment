@@ -1,15 +1,8 @@
 import { YelpClient } from "../thirdParty/yelp/client";
 import { YelpSearchResponse } from "../thirdParty/yelp/types";
-import {
-  DatabaseError,
-  ValidationError,
-  YelpApiError,
-} from "../errors/custom-errors";
+import { DatabaseError, ValidationError, YelpApiError } from "../errors/custom-errors";
 import { YelpBusiness } from "../thirdParty/yelp/types";
-import {
-  SearchRestaurantsParams,
-  ApiResponse,
-} from "../interfaces/gloabal-types";
+import { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
 import { PrismaClient } from "@prisma/client";
 import { ValidatorService } from "./validator.service";
 import { RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
@@ -48,10 +41,9 @@ export class RestaurantService {
     searchParams: SearchRestaurantsParams,
   ): Promise<RestaurantFormatForDatabase[]> {
     try {
-      const restaurantInfo: YelpSearchResponse =
-        await this.yelpClient.getRestaurantsFromYelpAPI(searchParams);
-      const mappedRestaurants: RestaurantFormatForDatabase[] =
-        restaurantInfo.businesses.map((restaurant: YelpBusiness) => {
+      const restaurantInfo: YelpSearchResponse = await this.yelpClient.getRestaurantsFromYelpAPI(searchParams);
+      const mappedRestaurants: RestaurantFormatForDatabase[] = restaurantInfo.businesses.map(
+        (restaurant: YelpBusiness) => {
           // validate the restaurant data before mapping
           ValidatorService.validateRestaurantFormatForDatabase(restaurant);
           return {
@@ -66,7 +58,8 @@ export class RestaurantService {
             restaurant_online: !restaurant.is_closed ? true : false,
             restaurant_offline: restaurant.is_closed ? true : false,
           };
-        });
+        },
+      );
 
       return mappedRestaurants;
     } catch (error: any) {
@@ -75,15 +68,11 @@ export class RestaurantService {
         throw error;
       }
       console.error(`[Unknown Error] ${error.message}`, error);
-      throw new Error(
-        `Failed to map restaurants to database schema: ${error.message}`,
-      );
+      throw new Error(`Failed to map restaurants to database schema: ${error.message}`);
     }
   }
 
-  async saveRestaurantsToDatabase(
-    restaurants: RestaurantFormatForDatabase[],
-  ): Promise<RestaurantFormatForDatabase[]> {
+  async saveRestaurantsToDatabase(restaurants: RestaurantFormatForDatabase[]): Promise<RestaurantFormatForDatabase[]> {
     try {
       const savedRestaurants: RestaurantFormatForDatabase[] = [];
       // Use transaction to ensure data consistency
@@ -113,12 +102,10 @@ export class RestaurantService {
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
     try {
       // 1. Map restaurants to database schema
-      const mappedRestaurants =
-        await this.mapRestaurantsToDatabaseSchema(searchParams);
+      const mappedRestaurants = await this.mapRestaurantsToDatabaseSchema(searchParams);
 
       // 2. Save to database
-      const savedRestaurants =
-        await this.saveRestaurantsToDatabase(mappedRestaurants);
+      const savedRestaurants = await this.saveRestaurantsToDatabase(mappedRestaurants);
 
       // 3. Return confirmation and Success
       return {
@@ -128,18 +115,12 @@ export class RestaurantService {
         data: savedRestaurants,
       };
     } catch (error: any) {
-      if (
-        error instanceof YelpApiError ||
-        error instanceof ValidationError ||
-        error instanceof DatabaseError
-      ) {
+      if (error instanceof YelpApiError || error instanceof ValidationError || error instanceof DatabaseError) {
         console.error(`[${error.name}] ${error.message}`, error);
         throw error;
       }
       console.error(`[Unknown Error] ${error.message}`, error);
-      throw new Error(
-        `Failed to sync restaurants and return restaurants: ${error.message}`,
-      );
+      throw new Error(`Failed to sync restaurants and return restaurants: ${error.message}`);
     }
   }
 }

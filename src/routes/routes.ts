@@ -5,12 +5,7 @@ import type { TsoaRoute } from "@tsoa/runtime";
 import { fetchMiddlewares, ExpressTemplateService } from "@tsoa/runtime";
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ReefV0FinancialsController } from "./reefapi.v0.js";
-import type {
-  Request as ExRequest,
-  Response as ExResponse,
-  RequestHandler,
-  Router,
-} from "express";
+import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from "express";
 
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
@@ -31,15 +26,9 @@ export function RegisterRoutes(app: Router) {
   app.get(
     "/reeftech/v0/financials",
     ...fetchMiddlewares<RequestHandler>(ReefV0FinancialsController),
-    ...fetchMiddlewares<RequestHandler>(
-      ReefV0FinancialsController.prototype.getFinancials,
-    ),
+    ...fetchMiddlewares<RequestHandler>(ReefV0FinancialsController.prototype.getFinancials),
 
-    async function ReefV0FinancialsController_getFinancials(
-      request: ExRequest,
-      response: ExResponse,
-      next: any,
-    ) {
+    async function ReefV0FinancialsController_getFinancials(request: ExRequest, response: ExResponse, next: any) {
       const args: Record<string, TsoaRoute.ParameterSchema> = {
         location: {
           in: "query",

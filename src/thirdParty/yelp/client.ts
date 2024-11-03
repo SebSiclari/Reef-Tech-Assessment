@@ -22,20 +22,15 @@ export class YelpClient {
     return queryParams.toString();
   }
 
-  async getRestaurantsFromYelpAPI(
-    filterParams: SearchRestaurantsParams,
-  ): Promise<YelpSearchResponse> {
+  async getRestaurantsFromYelpAPI(filterParams: SearchRestaurantsParams): Promise<YelpSearchResponse> {
     try {
       const queryParams = this.formatFilterParams(filterParams);
 
-      const response = await fetch(
-        `${process.env.YELP_API_URL}/businesses/search?${queryParams}`,
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-          },
+      const response = await fetch(`${process.env.YELP_API_URL}/businesses/search?${queryParams}`, {
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
         },
-      );
+      });
       const data = await response.json();
       return data;
     } catch (error: any) {
