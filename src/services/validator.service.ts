@@ -1,5 +1,6 @@
 import { ValidationError } from "../errors/custom-errors";
-import { YelpBusiness } from "../thirdParty/yelp/types";
+import type { YelpBusiness } from "../thirdParty/yelp/types";
+
 export class ValidatorService {
   static validateRestaurantFormatForDatabase(restaurant: YelpBusiness): void {
     if (!restaurant.name) {

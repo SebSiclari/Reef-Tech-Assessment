@@ -1,11 +1,11 @@
-import { YelpClient } from "../thirdParty/yelp/client";
-import { YelpSearchResponse } from "../thirdParty/yelp/types";
+import type { YelpClient } from "../thirdParty/yelp/client";
+import type { YelpSearchResponse } from "../thirdParty/yelp/types";
 import { DatabaseError, ValidationError, YelpApiError } from "../errors/custom-errors";
-import { YelpBusiness } from "../thirdParty/yelp/types";
-import { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
-import { PrismaClient } from "@prisma/client";
+import type { YelpBusiness } from "../thirdParty/yelp/types";
+import type { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
+import type { PrismaClient } from "@prisma/client";
 import { ValidatorService } from "./validator.service";
-import { RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
+import type { RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
 import { prismaClientSingleton, yelpClientSingleton } from "../utils/clients";
 
 export class RestaurantService {
@@ -20,8 +20,8 @@ export class RestaurantService {
       if (restaurant?.business_hours?.[0]?.open[0]) {
         const openingTime = restaurant.business_hours[0].open[0].start;
         // Split time into hours and minutes
-        const hour = parseInt(openingTime.slice(0, 2)); // e.g. "12" -> 12
-        const minute = parseInt(openingTime.slice(2, 4)); // e.g. "00" -> 0
+        const hour = Number.parseInt(openingTime.slice(0, 2)); // e.g. "12" -> 12
+        const minute = Number.parseInt(openingTime.slice(2, 4)); // e.g. "00" -> 0
         // Set the time
         now.setHours(hour, minute, 0, 0);
 
@@ -72,26 +72,23 @@ export class RestaurantService {
     }
   }
 
-  async saveRestaurantsToDatabase(restaurants: RestaurantFormatForDatabase[]): Promise<RestaurantFormatForDatabase[]> {
+  async saveRestaurantsToDatabase(restaurants: RestaurantFormatForDatabase[]): Promise<void> {
     try {
-      const savedRestaurants: RestaurantFormatForDatabase[] = [];
       // Use transaction to ensure data consistency
       await this.prisma.$transaction(async (tx) => {
         // Process each restaurant
         for (const restaurant of restaurants) {
           // Use upsert to either update existing or create new
-          const savedRestaurant = await tx.restaurantData.upsert({
+          await tx.restaurantData.upsert({
             where: {
               external_store_id: restaurant.external_store_id,
             },
             update: { ...restaurant },
             create: { ...restaurant },
           });
-          savedRestaurants.push(savedRestaurant);
         }
       });
 
-      return savedRestaurants;
     } catch (error: any) {
       throw new DatabaseError("Failed to save restaurants to database", error);
     }
@@ -101,18 +98,35 @@ export class RestaurantService {
     searchParams: SearchRestaurantsParams,
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
     try {
+      const { 
+        page = 1, 
+        limit = 10, 
+        sortBy = "date", 
+        order = "desc"
+      } = searchParams;
       // 1. Map restaurants to database schema
       const mappedRestaurants = await this.mapRestaurantsToDatabaseSchema(searchParams);
 
       // 2. Save to database
-      const savedRestaurants = await this.saveRestaurantsToDatabase(mappedRestaurants);
+     await this.saveRestaurantsToDatabase(mappedRestaurants);
+
+      console.log("mappedRestaurants", mappedRestaurants);
+      // 3. Fetch from database
+      const skip = (page - 1) * limit;
+      const fetchedRestaurants = await this.prisma.restaurantData.findMany({
+        orderBy: {
+          [sortBy]: order,
+        },
+        skip: skip || 0,
+        take: limit ? limit : 10
+      });
 
       // 3. Return confirmation and Success
       return {
         success: true,
         message: `Successfully synced ${mappedRestaurants.length} restaurants`,
-        count: mappedRestaurants.length,
-        data: savedRestaurants,
+        count: fetchedRestaurants.length,
+        data: fetchedRestaurants,
       };
     } catch (error: any) {
       if (error instanceof YelpApiError || error instanceof ValidationError || error instanceof DatabaseError) {

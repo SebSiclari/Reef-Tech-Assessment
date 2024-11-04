@@ -18,7 +18,7 @@ export class FinancialsRouter {
     this.router.get('/financials', validateSearchParams, this.getFinancials as any);
   }
 
-  private getFinancials: RouteHandler = async (req, res, next) => {
+  private getFinancials: RouteHandler= async (req, res, next) => {
     try {
       const searchParams: SearchRestaurantsParams = {
         location: String(req.query.location),

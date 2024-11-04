@@ -25,23 +25,23 @@ GET http://localhost:3000/api/financials
 
 1. **Basic Request**
 ```bash
-curl "http://localhost:3000/api/financials"
+curl "http://localhost:3000/api/v0/financials"
 ```
 
 2. **Filtered Request**
 ```bash
-curl "http://localhost:3000/api/financials?country=US&city=New%20York&startDate=2024-01-01&endDate=2024-12-31"
+curl "http://localhost:3000/api/v0/financials?country=US&city=New%20York&startDate=2024-01-01&endDate=2024-12-31"
 ```
 
 3. **Paginated Request**
 ```bash
-curl "http://localhost:3000/api/financials?page=1&limit=20&sortBy=desc"
+curl "http://localhost:3000/api/v0/financials?page=1&limit=20&sortBy=desc"
 ```
 
 ### Using Postman
 
 1. Create a new GET request
-2. Enter the URL: `http://localhost:3000/api/financials`
+2. Enter the URL: `http://localhost:3000/api/v0/financials`
 3. Add query parameters in the "Params" tab:
    - Key: `country`, Value: `US`
    - Key: `city`, Value: `New York`
@@ -87,22 +87,22 @@ curl "http://localhost:3000/api/financials?page=1&limit=20&sortBy=desc"
 
 1. **Filter by Country**
 ```bash
-curl "http://localhost:3000/api/financials?country=US"
+curl "http://localhost:3000/api/v0/financials?country=US"
 ```
 
 2. **Filter by Date Range**
 ```bash
-curl "http://localhost:3000/api/financials?startDate=2024-01-01&endDate=2024-03-15"
+curl "http://localhost:3000/api/v0/financials?startDate=2024-01-01&endDate=2024-03-15"
 ```
 
 3. **Pagination with Sorting**
 ```bash
-curl "http://localhost:3000/api/financials?page=2&limit=15&sortBy=desc"
+curl "http://localhost:3000/api/v0/financials?page=2&limit=15&sortBy=desc"
 ```
 
 4. **Multiple Filters**
 ```bash
-curl "http://localhost:3000/api/financials?country=US&city=New%20York&page=1&limit=20"
+curl "http://localhost:3000/api/v0/financials?country=US&city=New%20York&page=1&limit=20"
 ```
 
 ## Error Response Example
@@ -123,3 +123,41 @@ curl "http://localhost:3000/api/financials?country=US&city=New%20York&page=1&lim
 - City names with spaces should be URL encoded (e.g., New York → New%20York)
 - The default sort order is descending by date if not specified
 - Maximum limit per page is 100 items
+
+## Data Mapping from Yelp API
+
+The application maps data from the Yelp Fusion API to our required database schema. Here's how each field is mapped:
+
+| Database Field        | Yelp API Source           | Transformation/Default                    |
+|----------------------|---------------------------|------------------------------------------|
+| store_name           | business.name             | Direct mapping                           |
+| external_store_id    | business.id              | Direct mapping (Yelp's unique ID)        |
+| country             | business.location.country | Default to "US" if not provided          |
+| country_code        | business.location.country | Default to "US" if not provided          |
+| city                | business.location.city    | Direct mapping                           |
+| date                | N/A                      | Current timestamp when record is created  |
+| restaurant_opened_at | business.business_hours  | Parsed from hours.open[0].start or defaults to 9:00 AM |
+| menu_available      | N/A                      | Defaults to true (not provided by Yelp)   |
+| restaurant_online   | business.is_closed       | Inverse of is_closed                     |
+| restaurant_offline  | business.is_closed       | Direct mapping                           |
+
+### Mapping Logic Details
+
+1. **Opening Hours Processing**
+   - Extracts opening time from Yelp's business hours
+   - Converts "HHmm" format (e.g., "0900") to DateTime
+   - Defaults to 9:00 AM if no hours data available
+
+2. **Online/Offline Status**
+   - Derives from Yelp's `is_closed` boolean
+   - `restaurant_online = !is_closed`
+   - `restaurant_offline = is_closed`
+
+3. **Default Values**
+   - Country/Country Code: Defaults to "US" for North American businesses
+   - Menu Available: Always true as Yelp API doesn't provide menu availability
+   - Date: Set to current timestamp during record creation
+
+### Implementation
+
+The mapping is implemented in the RestaurantService class, specifically in the mapRestaurantsToDatabaseSchema method. See:

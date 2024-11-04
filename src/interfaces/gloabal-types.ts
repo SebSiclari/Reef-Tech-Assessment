@@ -1,9 +1,15 @@
+
+type SortBy = 'date' | 'store_name';
+type Order = 'asc' | 'desc';
 export interface SearchRestaurantsParams {
   location: string;
   term?: string;
   categories?: string;
   open_now?: boolean;
   limit?: number;
+  page?: number;
+  sortBy?: SortBy;
+  order?: Order;
 }
 
 export interface ApiResponse<T> {
