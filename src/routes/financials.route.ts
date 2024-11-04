@@ -1,19 +1,16 @@
-import { Router } from 'express';
-import { RestaurantController } from '../controllers/restaurant.controller';
-import { RestaurantService } from '../services/restaurant.service';
+import  { Router } from 'express';
+import  { RestaurantController } from '../controllers/restaurant.controller';
+import  { RestaurantService } from '../services/restaurant.service';
 import { validateSearchParams } from '../midlelware/middleware';
 import type { RouteHandler } from '../types/route-handler';
 import type { SearchRestaurantsParams } from '../interfaces/gloabal-types';
 
 
 export class FinancialsRouter {
-  private router: Router;
   private restaurantController: RestaurantController;
 
-  constructor() {
-    this.router = Router(); 
-    const restaurantService = new RestaurantService();
-    this.restaurantController = new RestaurantController(restaurantService);
+  constructor(private readonly router: Router = Router(), private readonly restaurantService: RestaurantService = new RestaurantService()) {
+    this.restaurantController = new RestaurantController(this.restaurantService);
     this.initializeRoutes();
   }
 
