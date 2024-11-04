@@ -1,6 +1,6 @@
 import { Route, Tags, Controller, Get, Query, SuccessResponse, Middlewares } from "tsoa";
 import { RestaurantController } from "../controllers/restaurant.controller";
-import { RestaurantFormatForDatabase, SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
+import type { RestaurantFormatForDatabase, SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
 import { RestaurantService } from "../services/restaurant.service";
 import { validateSearchParams } from "../midlelware/middleware";
 
@@ -42,9 +42,8 @@ export class ReefV0FinancialsController extends Controller {
     } catch (error) {
       if (error instanceof Error) {
         throw new Error(error.message);
-      } else {
-        throw new Error("An unknown error occurred");
       }
+        throw new Error("An unknown error occurred");
     }
   }
 }

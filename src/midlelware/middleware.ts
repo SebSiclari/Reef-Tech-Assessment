@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { SearchRestaurantsParams } from "../interfaces/gloabal-types";
+import type { NextFunction, Request, Response } from "express";
+import type { SearchRestaurantsParams } from "../interfaces/gloabal-types";
 import { ValidationError } from "../errors/custom-errors";
 
 export const errorHandler = (err: unknown, req: Request, res: Response, next: NextFunction) => {
@@ -12,23 +12,29 @@ export const errorHandler = (err: unknown, req: Request, res: Response, next: Ne
   }
 };
 
-export const validateSearchParams = (req: Request, next: NextFunction) => {
-  const { location, term, categories, open_now, limit } = req.query as unknown as SearchRestaurantsParams;
-  if (!location) {
+export const validateSearchParams = (req: Request, res:Response, next: NextFunction) => {
+  try {
+    const { location, term, categories, open_now, limit } = req.query as unknown as SearchRestaurantsParams;
+    if (!location) {
     throw new ValidationError("Location is required");
   }
   if (term && typeof term !== "string") {
     throw new ValidationError("Term must be a string");
-  }
-  if (categories && typeof categories !== "string") {
-    throw new ValidationError("Categories must be a string");
-  }
-  if (open_now && typeof open_now !== "boolean") {
+    }
+    if (categories && typeof categories !== "string") {
+      throw new ValidationError("Categories must be a string");
+    }
+  if (open_now && typeof open_now !== "string") {
     throw new ValidationError("Open now must be a boolean");
   }
-  if (limit && typeof limit !== "number") {
-    throw new ValidationError("Limit must be a number");
-  }
+  if (limit && typeof limit !== "string") {
+    console.log(limit);
+    console.log(typeof limit);
+      throw new ValidationError("Limit must be a number");
+    }
 
-  next();
+    next();
+  } catch (error) {
+    next(error);
+  }
 };

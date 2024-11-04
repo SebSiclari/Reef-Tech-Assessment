@@ -1,5 +1,5 @@
-import { ApiResponse, RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
-import { SearchRestaurantsParams } from "../interfaces/gloabal-types";
+import type { ApiResponse, RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
+import type { SearchRestaurantsParams } from "../interfaces/gloabal-types";
 import { RestaurantService } from "../services/restaurant.service";
 
 export class RestaurantController {
