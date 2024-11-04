@@ -1,24 +1,25 @@
-import  { Router } from 'express';
-import  { RestaurantController } from '../controllers/restaurant.controller';
-import  { RestaurantService } from '../services/restaurant.service';
-import { validateSearchParams } from '../midlelware/middleware';
-import type { RouteHandler } from '../types/route-handler';
-import type { SearchRestaurantsParams } from '../interfaces/gloabal-types';
-
+import { Router } from "express";
+import { RestaurantController } from "../controllers/restaurant.controller";
+import type { RestaurantService } from "../services/restaurant.service";
+import { validateSearchParams } from "../midlelware/middleware";
+import type { RouteHandler } from "../types/route-handler";
+import type { SearchRestaurantsParams } from "../interfaces/gloabal-types";
 
 export class FinancialsRouter {
   private restaurantController: RestaurantController;
-
-  constructor(private readonly router: Router = Router(), private readonly restaurantService: RestaurantService = new RestaurantService()) {
+  constructor(
+    private readonly restaurantService: RestaurantService,
+    private readonly router: Router = Router(),
+  ) {
     this.restaurantController = new RestaurantController(this.restaurantService);
     this.initializeRoutes();
   }
 
   private initializeRoutes(): void {
-    this.router.get('/financials', validateSearchParams, this.getFinancials as any);
+    this.router.get("/financials", validateSearchParams, this.getFinancials as any);
   }
 
-  private getFinancials: RouteHandler= async (req, res, next) => {
+  private getFinancials: RouteHandler = async (req, res, next) => {
     try {
       const searchParams: SearchRestaurantsParams = {
         location: String(req.query.location),

@@ -1,11 +1,14 @@
-import express, { json, urlencoded } from 'express';
-import cors from 'cors';
-import { FinancialsRouter } from './routes/financials.route';
+import express, { json, urlencoded } from "express";
+import cors from "cors";
+import { FinancialsRouter } from "./routes/financials.route";
+import { prismaClientSingleton } from "./utils/clients";
+import { YelpClient } from "./thirdParty/yelp/client";
+import { RestaurantService } from "./services/restaurant.service";
 //import { RegisterRoutes } from './routes/routes';
 ///import './routes/reefapi.v0.js';
 
 const app = express();
-const financialsRouter = new FinancialsRouter();
+const financialsRouter = new FinancialsRouter(new RestaurantService(new YelpClient(), prismaClientSingleton));
 // Middleware to parse JSON and URL-encoded data
 app.use(urlencoded({ extended: true }));
 app.use(json());
@@ -17,11 +20,11 @@ app.use(cors());
 //RegisterRoutes(app);
 
 // Register routes
-app.use('/api/v0', financialsRouter.getRouter());
+app.use("/api/v0", financialsRouter.getRouter());
 
 // Handle 404 errors
 app.use((req, res) => {
-  res.status(404).json({ error: 'Not found' });
+  res.status(404).json({ error: "Not found" });
 });
 
 export default app;

@@ -1,6 +1,5 @@
-
-type SortBy = 'date' | 'store_name';
-type Order = 'asc' | 'desc';
+type SortBy = "date" | "store_name";
+type Order = "asc" | "desc";
 export interface SearchRestaurantsParams {
   location: string;
   term?: string;

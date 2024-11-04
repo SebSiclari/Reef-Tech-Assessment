@@ -1,9 +1,11 @@
 import type { ApiResponse, RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
 import type { SearchRestaurantsParams } from "../interfaces/gloabal-types";
-import { RestaurantService } from "../services/restaurant.service";
+import type { RestaurantService } from "../services/restaurant.service";
 
 export class RestaurantController {
-  constructor(private readonly restaurantService: RestaurantService = new RestaurantService()) {}
+  constructor(private readonly restaurantService: RestaurantService) {
+    this.restaurantService = restaurantService;
+  }
 
   public async getRestaurants(
     searchParams: SearchRestaurantsParams,

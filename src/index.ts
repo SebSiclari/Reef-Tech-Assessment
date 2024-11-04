@@ -1,14 +1,14 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
-import app from './app';
-import { prismaClientSingleton } from './utils/clients';
+import app from "./app";
+import { prismaClientSingleton } from "./utils/clients";
 
 // Initialize database connection
 prismaClientSingleton
   .$connect()
   .then(() => {
-    console.log('Successfully connected to database');
+    console.log("Successfully connected to database");
 
     // Start the server after the database connection is established
     const PORT = process.env.PORT || 3000;
@@ -17,6 +17,6 @@ prismaClientSingleton
     });
   })
   .catch((error) => {
-    console.error('Failed to connect to database:', error);
+    console.error("Failed to connect to database:", error);
     process.exit(1);
   });

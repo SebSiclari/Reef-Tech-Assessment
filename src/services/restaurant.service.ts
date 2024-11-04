@@ -4,15 +4,17 @@ import { DatabaseError, ValidationError, YelpApiError } from "../errors/custom-e
 import type { YelpBusiness } from "../thirdParty/yelp/types";
 import type { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
 import type { PrismaClient } from "@prisma/client";
-import { ValidatorService } from "./validator.service";
+import { validateRestaurantFormatForDatabase } from "../utils/validator";
 import type { RestaurantFormatForDatabase } from "../interfaces/gloabal-types";
-import { prismaClientSingleton, yelpClientSingleton } from "../utils/clients";
 
 export class RestaurantService {
   constructor(
-    private readonly yelpClient: YelpClient = yelpClientSingleton,
-    private readonly prisma: PrismaClient = prismaClientSingleton,
-  ) {}
+    private readonly yelpClient: YelpClient,
+    private readonly prisma: PrismaClient,
+  ) {
+    this.yelpClient = yelpClient;
+    this.prisma = prisma;
+  }
 
   private parseOpeningHours(restaurant: YelpBusiness): Date {
     const now = new Date();
@@ -37,15 +39,13 @@ export class RestaurantService {
     }
   }
 
-  private async mapRestaurantsToDatabaseSchema(
-    searchParams: SearchRestaurantsParams,
-  ): Promise<RestaurantFormatForDatabase[]> {
+  async mapRestaurantsToDatabaseSchema(searchParams: SearchRestaurantsParams): Promise<RestaurantFormatForDatabase[]> {
     try {
       const restaurantInfo: YelpSearchResponse = await this.yelpClient.getRestaurantsFromYelpAPI(searchParams);
       const mappedRestaurants: RestaurantFormatForDatabase[] = restaurantInfo.businesses.map(
         (restaurant: YelpBusiness) => {
           // validate the restaurant data before mapping
-          ValidatorService.validateRestaurantFormatForDatabase(restaurant);
+          validateRestaurantFormatForDatabase(restaurant);
           return {
             store_name: restaurant.name,
             external_store_id: restaurant.id,
@@ -88,7 +88,6 @@ export class RestaurantService {
           });
         }
       });
-
     } catch (error: any) {
       throw new DatabaseError("Failed to save restaurants to database", error);
     }
@@ -98,17 +97,12 @@ export class RestaurantService {
     searchParams: SearchRestaurantsParams,
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
     try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        sortBy = "date", 
-        order = "desc"
-      } = searchParams;
+      const { page = 1, limit = 10, sortBy = "date", order = "desc" } = searchParams;
       // 1. Map restaurants to database schema
       const mappedRestaurants = await this.mapRestaurantsToDatabaseSchema(searchParams);
 
       // 2. Save to database
-     await this.saveRestaurantsToDatabase(mappedRestaurants);
+      await this.saveRestaurantsToDatabase(mappedRestaurants);
 
       console.log("mappedRestaurants", mappedRestaurants);
       // 3. Fetch from database
@@ -118,7 +112,7 @@ export class RestaurantService {
           [sortBy]: order,
         },
         skip: skip || 0,
-        take: limit ? limit : 10
+        take: limit ? limit : 10,
       });
 
       // 3. Return confirmation and Success

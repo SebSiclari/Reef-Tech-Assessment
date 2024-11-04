@@ -1,6 +1,6 @@
-import { YelpSearchResponse } from "./types";
+import type { YelpSearchResponse } from "./types";
 import { YelpApiError } from "../../errors/custom-errors";
-import { SearchRestaurantsParams } from "../../interfaces/gloabal-types";
+import type { SearchRestaurantsParams } from "../../interfaces/gloabal-types";
 
 export class YelpClient {
   constructor(private readonly apiKey: string = process.env.YELP_API_KEY!) {
