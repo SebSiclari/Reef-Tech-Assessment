@@ -6,7 +6,9 @@ import { YelpClient } from "./thirdParty/yelp/client";
 import { RestaurantService } from "./services/restaurant.service";
 
 const app = express();
-const financialsRouter = new FinancialsRouter(new RestaurantService(new YelpClient(), prismaClientSingleton));
+const yelpClient = new YelpClient();
+const restaurantService = new RestaurantService(yelpClient, prismaClientSingleton);
+const financialsRouter = new FinancialsRouter(restaurantService);
 // Middleware to parse JSON and URL-encoded data
 app.use(urlencoded({ extended: true }));
 app.use(json());
