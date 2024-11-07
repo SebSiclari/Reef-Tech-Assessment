@@ -25,17 +25,17 @@ GET http://localhost:3000/api/financials
 
 1. **Basic Request**
 ```bash
-curl "http://localhost:3000/api/v0/financials"
+curl "http://localhost:3000/api/v0/financials?location=Miami"
 ```
 
 2. **Filtered Request**
 ```bash
-curl "http://localhost:3000/api/v0/financials?country=US&city=New%20York&startDate=2024-01-01&endDate=2024-12-31"
+curl "http://localhost:3000/api/v0/financials?location=New%20York&startDate=2024-01-01&endDate=2024-12-31"
 ```
 
 3. **Paginated Request**
 ```bash
-curl "http://localhost:3000/api/v0/financials?page=1&limit=20&sortBy=desc"
+curl "http://localhost:3000/api/v0/financials?location=New%20York&page=1&limit=20&sortBy=desc"
 ```
 
 ### Using Postman

@@ -1,31 +1,36 @@
-export class YelpApiError extends Error {
+export class BaseError extends Error {
   constructor(
     message: string,
     public readonly statusCode: number,
+    name: string
   ) {
     super(message);
-    this.name = "YelpApiError";
+    this.name = name;
     this.statusCode = statusCode;
-    Object.setPrototypeOf(this, YelpApiError.prototype);
+    Object.setPrototypeOf(this, this.constructor.prototype);
   }
 }
 
-export class DatabaseError extends Error {
-  constructor(
-    message: string,
-    public readonly statusCode: number,
-  ) {
-    super(message);
-    this.name = "DatabaseError";
-    this.statusCode = statusCode;
-    Object.setPrototypeOf(this, DatabaseError.prototype);
+export class YelpApiError extends BaseError {
+  constructor(message: string, statusCode: number) {
+    super(message, statusCode, "YelpApiError");
   }
 }
 
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ValidationError";
-    Object.setPrototypeOf(this, ValidationError.prototype);
+export class MappingError extends BaseError {
+  constructor(message: string, statusCode: number) {
+    super(message, statusCode, "MappingError");
+  }
+}
+
+export class DatabaseError extends BaseError {
+  constructor(message: string, statusCode: number) {
+    super(message, statusCode, "DatabaseError"); 
+  }
+}
+
+export class ValidationError extends BaseError {
+  constructor(message: string, statusCode: number) {
+    super(message, statusCode, "ValidationError");
   }
 }

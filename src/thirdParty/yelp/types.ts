@@ -29,4 +29,10 @@ export interface YelpBusiness {
 export interface YelpSearchResponse {
   businesses: YelpBusiness[];
   total: number;
-}
+} 
+
+
+
+
+
+

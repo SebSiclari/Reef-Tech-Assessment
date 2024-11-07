@@ -1,6 +1,6 @@
 import type { YelpClient } from "../thirdParty/yelp/client";
 import type { YelpSearchResponse } from "../thirdParty/yelp/types";
-import { DatabaseError, ValidationError, YelpApiError } from "../errors/custom-errors";
+import { BaseError, DatabaseError, MappingError, ValidationError, YelpApiError } from "../errors/custom-errors";
 import type { YelpBusiness } from "../thirdParty/yelp/types";
 import type { SearchRestaurantsParams, ApiResponse } from "../interfaces/gloabal-types";
 import type { PrismaClient } from "@prisma/client";
@@ -24,7 +24,6 @@ export class RestaurantService {
         // Split time into hours and minutes
         const hour = Number.parseInt(openingTime.slice(0, 2)); // e.g. "12" -> 12
         const minute = Number.parseInt(openingTime.slice(2, 4)); // e.g. "00" -> 0
-        // Set the time
         now.setHours(hour, minute, 0, 0);
 
         return now;
@@ -44,7 +43,7 @@ export class RestaurantService {
       const restaurantInfo: YelpSearchResponse = await this.yelpClient.getRestaurantsFromYelpAPI(searchParams);
       const mappedRestaurants: RestaurantFormatForDatabase[] = restaurantInfo.businesses.map(
         (restaurant: YelpBusiness) => {
-          // validate the restaurant data before mapping
+
           validateRestaurantFormatForDatabase(restaurant);
           return {
             store_name: restaurant.name,
@@ -68,7 +67,7 @@ export class RestaurantService {
         throw error;
       }
       console.error(`[Unknown Error] ${error.message}`, error);
-      throw new Error(`Failed to map restaurants to database schema: ${error.message}`);
+      throw new MappingError(`Failed to map restaurants to database schema: ${error.message}`, 500);
     }
   }
 
@@ -89,7 +88,7 @@ export class RestaurantService {
         }
       });
     } catch (error: any) {
-      throw new DatabaseError("Failed to save restaurants to database", error);
+      throw new DatabaseError("Failed to save restaurants to database", 500);
     }
   }
 
@@ -98,14 +97,13 @@ export class RestaurantService {
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
     try {
       const { page = 1, limit = 10, sortBy = "date", order = "desc" } = searchParams;
-      // 1. Map restaurants to database schema
+
       const mappedRestaurants = await this.mapRestaurantsToDatabaseSchema(searchParams);
 
-      // 2. Save to database
       await this.saveRestaurantsToDatabase(mappedRestaurants);
 
       console.log("mappedRestaurants", mappedRestaurants);
-      // 3. Fetch from database
+
       const skip = (page - 1) * limit;
       const fetchedRestaurants = await this.prisma.restaurantData.findMany({
         orderBy: {
@@ -115,7 +113,6 @@ export class RestaurantService {
         take: limit ? limit : 10,
       });
 
-      // 3. Return confirmation and Success
       return {
         success: true,
         message: `Successfully synced ${mappedRestaurants.length} restaurants`,
@@ -123,7 +120,7 @@ export class RestaurantService {
         data: fetchedRestaurants,
       };
     } catch (error: any) {
-      if (error instanceof YelpApiError || error instanceof ValidationError || error instanceof DatabaseError) {
+      if (error instanceof BaseError) {
         console.error(`[${error.name}] ${error.message}`, error);
         throw error;
       }

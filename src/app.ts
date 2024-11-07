@@ -1,6 +1,6 @@
 import express, { json, urlencoded } from "express";
 import cors from "cors";
-import { FinancialsRouter } from "./routes/financials.route";
+import { registerFinancialsRoutes } from "./routes/financials.route";
 import { prismaClientSingleton } from "./utils/clients";
 import { YelpClient } from "./thirdParty/yelp/client";
 import { RestaurantService } from "./services/restaurant.service";
@@ -8,7 +8,7 @@ import { RestaurantService } from "./services/restaurant.service";
 const app = express();
 const yelpClient = new YelpClient();
 const restaurantService = new RestaurantService(yelpClient, prismaClientSingleton);
-const financialsRouter = new FinancialsRouter(restaurantService);
+const financialsRouter = registerFinancialsRoutes(restaurantService);
 // Middleware to parse JSON and URL-encoded data
 app.use(urlencoded({ extended: true }));
 app.use(json());
@@ -18,7 +18,7 @@ app.use(cors());
 
 
 // Register routes
-app.use("/api/v0", financialsRouter.getRouter());
+app.use("/api/v0", financialsRouter);
 
 // Handle 404 errors
 app.use((req, res) => {

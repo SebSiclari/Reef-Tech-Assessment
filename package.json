@@ -7,7 +7,7 @@
     "start": "ts-node src/index.ts",
     "dev": "concurrently \"npx tsoa routes -c tsoa.json\" \"ts-node-dev --respawn src/index.ts\"",
     "build": "tsc",
-    "test": "node --test --require ts-node/register src/__tests__/restaurant.service.test.ts"
+    "test": "node --test --require ts-node/register src/__tests__/setup.ts src/__tests__/*.test.ts"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "@types/cors": "^2.8.17",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
+    "express": "^4.21.1",
+    "supertest": "^7.0.0"
   }
 }
