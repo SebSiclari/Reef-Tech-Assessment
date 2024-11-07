@@ -2,7 +2,7 @@ export class BaseError extends Error {
   constructor(
     message: string,
     public readonly statusCode: number,
-    name: string
+    name: string,
   ) {
     super(message);
     this.name = name;
@@ -25,7 +25,7 @@ export class MappingError extends BaseError {
 
 export class DatabaseError extends BaseError {
   constructor(message: string, statusCode: number) {
-    super(message, statusCode, "DatabaseError"); 
+    super(message, statusCode, "DatabaseError");
   }
 }
 

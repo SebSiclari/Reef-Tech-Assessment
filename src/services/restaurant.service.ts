@@ -16,6 +16,11 @@ export class RestaurantService {
     this.prisma = prisma;
   }
 
+  /**
+   * Parses the opening hours of a restaurant and returns a Date object
+   * @param {YelpBusiness} restaurant - The restaurant object
+   * @returns {Date} - The parsed opening hours
+   */
   private parseOpeningHours(restaurant: YelpBusiness): Date {
     const now = new Date();
     try {
@@ -38,12 +43,16 @@ export class RestaurantService {
     }
   }
 
+  /**
+   * Maps the restaurants to the database schema
+   * @param {SearchRestaurantsParams} searchParams - The search parameters
+   * @returns {RestaurantFormatForDatabase[]} - The mapped restaurants
+   */
   async mapRestaurantsToDatabaseSchema(searchParams: SearchRestaurantsParams): Promise<RestaurantFormatForDatabase[]> {
     try {
       const restaurantInfo: YelpSearchResponse = await this.yelpClient.getRestaurantsFromYelpAPI(searchParams);
       const mappedRestaurants: RestaurantFormatForDatabase[] = restaurantInfo.businesses.map(
         (restaurant: YelpBusiness) => {
-
           validateRestaurantFormatForDatabase(restaurant);
           return {
             store_name: restaurant.name,
@@ -71,13 +80,14 @@ export class RestaurantService {
     }
   }
 
+  /**
+   * Saves the restaurants to the database
+   * @param {RestaurantFormatForDatabase[]} restaurants - The restaurants to save
+   */
   async saveRestaurantsToDatabase(restaurants: RestaurantFormatForDatabase[]): Promise<void> {
     try {
-      // Use transaction to ensure data consistency
       await this.prisma.$transaction(async (tx) => {
-        // Process each restaurant
         for (const restaurant of restaurants) {
-          // Use upsert to either update existing or create new
           await tx.restaurantData.upsert({
             where: {
               external_store_id: restaurant.external_store_id,
@@ -101,8 +111,6 @@ export class RestaurantService {
       const mappedRestaurants = await this.mapRestaurantsToDatabaseSchema(searchParams);
 
       await this.saveRestaurantsToDatabase(mappedRestaurants);
-
-      console.log("mappedRestaurants", mappedRestaurants);
 
       const skip = (page - 1) * limit;
       const fetchedRestaurants = await this.prisma.restaurantData.findMany({

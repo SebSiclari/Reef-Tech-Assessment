@@ -16,7 +16,6 @@ app.use(json());
 // Enable CORS
 app.use(cors());
 
-
 // Register routes
 app.use("/api/v0", financialsRouter);
 

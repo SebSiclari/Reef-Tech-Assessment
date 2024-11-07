@@ -11,6 +11,11 @@ export class YelpClient {
     this.apiKey = apiKey;
   }
 
+  /**
+   * Formats the filter parameters for the Yelp API
+   * @param {SearchRestaurantsParams} filterParams - The search parameters
+   * @returns {string} - The formatted query parameters
+   */
   private formatFilterParams(filterParams: SearchRestaurantsParams): string {
     const { location, term, categories, open_now, limit } = filterParams;
     const queryParams = new URLSearchParams({
@@ -23,6 +28,11 @@ export class YelpClient {
     return queryParams.toString();
   }
 
+  /**
+   * Fetches restaurants from the Yelp API
+   * @param {SearchRestaurantsParams} filterParams - The search parameters
+   * @returns {Promise<YelpSearchResponse>} - The restaurants
+   */
   async getRestaurantsFromYelpAPI(filterParams: SearchRestaurantsParams): Promise<YelpSearchResponse> {
     try {
       const queryParams = this.formatFilterParams(filterParams);

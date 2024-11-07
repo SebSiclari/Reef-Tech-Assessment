@@ -115,7 +115,7 @@ describe("RestaurantService", async () => {
       const service = new RestaurantService(mockYelpClient, mockPrisma);
 
       await assert.rejects(
-         () => service.mapRestaurantsToDatabaseSchema({ location: "New York" }),
+        () => service.mapRestaurantsToDatabaseSchema({ location: "New York" }),
         (err: any) => {
           assert.ok(err instanceof ValidationError);
           assert.equal(err.message, "Restaurant name is required");

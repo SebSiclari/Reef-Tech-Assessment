@@ -9,6 +9,11 @@ export class RestaurantController {
     this.restaurantService = restaurantService;
   }
 
+  /**
+   * Fetches restaurants from the database
+   * @param {Request} req - The request object
+   * @param {Response} res - The response object
+   */
   public getFinancials = async (req: Request, res: Response) => {
     try {
       const searchParams: SearchRestaurantsParams = {
@@ -20,7 +25,6 @@ export class RestaurantController {
       };
 
       const restaurants = await this.getRestaurants(searchParams);
-      console.log(restaurants);
       res.status(200).json(restaurants);
     } catch (error) {
       if (error instanceof BaseError) {
@@ -32,6 +36,11 @@ export class RestaurantController {
     }
   };
 
+  /**
+   * Fetches restaurants from the database
+   * @param {SearchRestaurantsParams} searchParams - The search parameters
+   * @returns {Promise<ApiResponse<RestaurantFormatForDatabase[]>>} - The restaurants
+   */
   private async getRestaurants(
     searchParams: SearchRestaurantsParams,
   ): Promise<ApiResponse<RestaurantFormatForDatabase[]>> {
